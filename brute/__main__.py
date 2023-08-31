@@ -1,0 +1,78 @@
+import logging
+
+from brute.enum import Mode
+
+logging.basicConfig(
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    level=logging.INFO
+)
+
+import multiprocessing
+import signal
+import sys
+import socket
+import time
+from typing import List
+from .child import child_main
+
+running = True
+
+
+def stop(*args):
+    global running
+    running = False
+
+
+signal.signal(signal.SIGTERM, stop)
+signal.signal(signal.SIGINT, stop)
+
+
+def main_loop(s: socket.socket, children: List[multiprocessing.Process], mode: Mode):
+    try:
+        for proc in children:
+            if not proc.is_alive():
+                proc.join()
+                children.remove(proc)
+
+        client, addr = s.accept()
+        if client:
+            p = multiprocessing.Process(target=child_main, args=(client, addr, mode))
+            p.start()
+            children.append(p)
+
+        time.sleep(0.1)
+    except BlockingIOError:
+        pass
+
+
+def main(ip: str = "0.0.0.0", port: int = 22, mode: str = "logging"):
+    mode_enum = Mode.from_str(mode)
+    logging.info(f"Starting in mode {mode_enum.value} on {ip}:{port}")
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    s.setblocking(False)
+    s.bind((ip, int(port)))
+
+    children = list()
+
+    s.listen()
+    try:
+        while running:
+            main_loop(s, children, mode_enum)
+        logging.info(f"Stopped by SIGTERM")
+    except KeyboardInterrupt:
+        logging.info(f"Keyboard interrupt")
+
+    s.close()
+    logging.info("Socket closed")
+
+    for proc in children:
+        logging.info(f"Waiting for child with pid = {proc.pid}")
+        proc.join()
+
+    logging.info("exiting...")
+
+
+if __name__ == "__main__":
+    main(*sys.argv[1:])
