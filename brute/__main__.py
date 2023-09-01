@@ -1,4 +1,5 @@
 import logging
+import os
 
 from brute.enum import Mode
 
@@ -14,6 +15,7 @@ import socket
 import time
 from typing import List
 from .child import child_main
+from .db import make_schema, make_engine
 
 running = True
 
@@ -27,16 +29,16 @@ signal.signal(signal.SIGTERM, stop)
 signal.signal(signal.SIGINT, stop)
 
 
-def main_loop(s: socket.socket, children: List[multiprocessing.Process], mode: Mode):
+def main_loop(s: socket.socket, children: List[multiprocessing.Process], server_addr: tuple, mode: Mode):
     try:
         for proc in children:
             if not proc.is_alive():
                 proc.join()
                 children.remove(proc)
 
-        client, addr = s.accept()
+        client, client_addr = s.accept()
         if client:
-            p = multiprocessing.Process(target=child_main, args=(client, addr, mode))
+            p = multiprocessing.Process(target=child_main, args=(client, client_addr, server_addr, mode))
             p.start()
             children.append(p)
 
@@ -59,7 +61,7 @@ def main(ip: str = "0.0.0.0", port: int = 22, mode: str = "logging"):
     s.listen()
     try:
         while running:
-            main_loop(s, children, mode_enum)
+            main_loop(s, children, (ip, port), mode_enum)
         logging.info(f"Stopped by SIGTERM")
     except KeyboardInterrupt:
         logging.info(f"Keyboard interrupt")
@@ -75,4 +77,6 @@ def main(ip: str = "0.0.0.0", port: int = 22, mode: str = "logging"):
 
 
 if __name__ == "__main__":
+    engine = make_engine(os.environ["SQLALCHEMY_URL"])
+    make_schema(engine)
     main(*sys.argv[1:])

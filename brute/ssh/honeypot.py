@@ -12,6 +12,9 @@ class HoneypotServer(paramiko.ServerInterface):
     client: paramiko.SSHClient
     client_channel: paramiko.Channel
 
+    def __init__(self, **kwargs):
+        pass
+
     def check_channel_request(self, kind: str, chanid: int) -> int:
         if kind == 'session':
             self.honeypot = DockerHoneypot()
