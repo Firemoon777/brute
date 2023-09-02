@@ -18,7 +18,7 @@ class DockerHoneypot(Honeypot):
         self.container_id = None
 
     def start(self):
-        self.container_id = subprocess.check_output(["docker", "run", "-d", self.image]).decode().strip()
+        self.container_id = subprocess.check_output(["docker", "run", "-d", "--cpus=2", "--memory=1g", self.image]).decode().strip()
 
     def get_ip(self):
         ip = subprocess.check_output([

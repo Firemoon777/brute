@@ -105,4 +105,5 @@ cython_debug/
 key
 key.pub
 secret.env
-GeoLite2-City-Blocks-IPv4.csv
+geolite2
+treasure
