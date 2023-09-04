@@ -60,6 +60,22 @@ class SSHConnectLog(Base):
     shell: Mapped[str] = mapped_column(nullable=True)
 
 
+class IPEntry(Base):
+    __tablename__ = "ip_entry"
+
+    ip: Mapped[str] = mapped_column(primary_key=True)
+
+    asn: Mapped[int] = mapped_column(nullable=True)
+    as_: Mapped[str] = mapped_column(nullable=True)
+
+    geoname_id: Mapped[int] = mapped_column(nullable=True)
+    country_name: Mapped[str] = mapped_column(nullable=True)
+    city_name: Mapped[str] = mapped_column(nullable=True)
+    latitude: Mapped[float] = mapped_column(nullable=True)
+    longitude: Mapped[float] = mapped_column(nullable=True)
+    accuracy_radius: Mapped[float] = mapped_column(nullable=True)
+
+
 def make_engine(url):
     return create_engine(url)
 
