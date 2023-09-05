@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, DateTime, select, distinct
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
 
 
-from brute.db import make_engine, make_schema, SSHLoginAttempt, SSHConnectLog, Base, IPEntry
+from brute.db import make_engine, make_schema, SSHLoginAttempt, SSHConnectLog, Base, IPEntry, WebLoginAttempt
 
 engine = make_engine(os.environ["SQLALCHEMY_URL"])
 Base.metadata.create_all(engine)
@@ -20,6 +20,7 @@ exists = select(distinct(IPEntry.ip))
 stmt_arr = [
     select(distinct(SSHLoginAttempt.attacker_ip)).where(SSHLoginAttempt.attacker_ip.notin_(exists)),
     select(distinct(SSHConnectLog.attacker_ip)).where(SSHConnectLog.attacker_ip.notin_(exists)),
+    select(distinct(WebLoginAttempt.attacker_ip)).where(WebLoginAttempt.attacker_ip.notin_(exists)),
 ]
 
 to_export = dict()

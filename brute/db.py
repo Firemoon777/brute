@@ -1,7 +1,7 @@
 from datetime import datetime
 import os
 
-from sqlalchemy import create_engine, DateTime
+from sqlalchemy import create_engine, DateTime, JSON
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
 
 
@@ -30,6 +30,35 @@ class SSHLoginAttempt(Base):
     login: Mapped[str] = mapped_column(nullable=True)
     password: Mapped[str] = mapped_column(nullable=True)
     cert: Mapped[str] = mapped_column(nullable=True)
+
+
+class WebLoginAttempt(Base):
+    __tablename__ = "web_login_attempt"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+    attempt_time: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=datetime.now()
+    )
+
+    attacker_ip: Mapped[str]
+    attacker_user_agent: Mapped[str] = mapped_column(nullable=True)
+
+    method: Mapped[str]
+    path: Mapped[str]
+
+    content_type: Mapped[str] = mapped_column(nullable=True)
+
+    headers: Mapped[dict] = mapped_column(type_=JSON)
+    cookies: Mapped[dict] = mapped_column(type_=JSON)
+    query: Mapped[dict] = mapped_column(type_=JSON)
+
+    login: Mapped[str] = mapped_column(nullable=True)
+    password: Mapped[str] = mapped_column(nullable=True)
+
+    body: Mapped[bytes] = mapped_column(nullable=True)
+    body_decoded: Mapped[str] = mapped_column(nullable=True)
 
 
 class SSHConnectLog(Base):
@@ -74,6 +103,9 @@ class IPEntry(Base):
     latitude: Mapped[float] = mapped_column(nullable=True)
     longitude: Mapped[float] = mapped_column(nullable=True)
     accuracy_radius: Mapped[float] = mapped_column(nullable=True)
+
+
+
 
 
 def make_engine(url):
