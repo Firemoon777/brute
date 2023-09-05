@@ -56,7 +56,7 @@ def main(ip: str = "0.0.0.0", port: int = 22, mode: str = "logging"):
     s.setblocking(False)
     s.bind((ip, int(port)))
 
-    children = list()
+    children: List[multiprocessing.Process] = list()
 
     s.listen()
     try:
@@ -71,6 +71,8 @@ def main(ip: str = "0.0.0.0", port: int = 22, mode: str = "logging"):
 
     for proc in children:
         logging.info(f"Waiting for child with pid = {proc.pid}")
+        if proc.is_alive():
+            proc.kill()
         proc.join()
 
     logging.info("exiting...")

@@ -61,6 +61,25 @@ class WebLoginAttempt(Base):
     body_decoded: Mapped[str] = mapped_column(nullable=True)
 
 
+class SMTPSendLog(Base):
+    __tablename__ = "smtp_send_log"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+    attempt_time: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=datetime.now()
+    )
+
+    attacker_ip: Mapped[str]
+    attacker_client: Mapped[str]
+
+    msg_from: Mapped[str]
+    msg_to: Mapped[str]
+    msg_data: Mapped[bytes]
+    msg_data_encoded: Mapped[str]
+
+
 class SSHConnectLog(Base):
     __tablename__ = "ssh_connect_log"
 
