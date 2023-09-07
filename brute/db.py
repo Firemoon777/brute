@@ -80,6 +80,19 @@ class SMTPSendLog(Base):
     msg_data_encoded: Mapped[str]
 
 
+class TCPScanLog(Base):
+    __tablename__ = "tcp_scan_log"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    attempt_time: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=datetime.now()
+    )
+
+    attacker_ip: Mapped[str]
+    dst_port: Mapped[int]
+
+
 class SSHConnectLog(Base):
     __tablename__ = "ssh_connect_log"
 
