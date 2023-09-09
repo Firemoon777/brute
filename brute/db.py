@@ -91,6 +91,7 @@ class TCPScanLog(Base):
 
     attacker_ip: Mapped[str]
     dst_port: Mapped[int]
+    proto: Mapped[str]
 
 
 class SSHConnectLog(Base):
