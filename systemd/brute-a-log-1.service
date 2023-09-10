@@ -1,0 +1,11 @@
+[Unit]
+Description=example systemd service unit file.
+
+[Service]
+WorkingDirectory=/root/brute-prod
+EnvironmentFile=/root/brute-prod/secret.env
+ExecStart=/usr/bin/env python3 -m brute <a-domain> 222 logging
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
